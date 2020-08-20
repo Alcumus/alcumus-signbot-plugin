@@ -8,7 +8,7 @@ export const useSignature = ({
     lineCap = 'round',
     lineJoin = 'round',
     lineWidth = 4,
-    onSaveCB = () => {},
+    onSaveCB = () => { },
     strokeStyle = 'black',
 }) => {
     const [resetOrientation, setResetOrientation] = React.useState(false)
@@ -17,20 +17,20 @@ export const useSignature = ({
     const [editing, setEditing] = React.useState(saved ? false : true)
     const { width, height } = useWindowSize()
 
+    let boundingRect
     let isBlank = true
     let isDrawing = false
+    let scaleX
+    let scaleY
     let whatBlankLooksLike
     let x = 0
     let y = 0
-    let boundingRect
-    let scaleX
-    let scaleY
 
     const initialiseCanvasStyles = () => {
-        context.strokeStyle = strokeStyle
-        context.lineJoin = lineJoin
         context.lineCap = lineCap
+        context.lineJoin = lineJoin
         context.lineWidth = lineWidth
+        context.strokeStyle = strokeStyle
     }
 
     const reset = () => {
@@ -47,6 +47,7 @@ export const useSignature = ({
 
     React.useEffect(() => {
         if (!context) return
+
         const getXy = ({ changedTouches = [{}], offsetX, offsetY }) => {
             const [{ clientX, clientY }] = changedTouches
 
@@ -56,6 +57,7 @@ export const useSignature = ({
 
             return [Math.round(ix || offsetX), Math.round(iy || offsetY)]
         }
+
         const handleDrawEnd = (e) => {
             e.preventDefault()
             isDrawing = false
@@ -70,24 +72,25 @@ export const useSignature = ({
         const handleDrawInit = (e) => {
             e.preventDefault()
             isDrawing = true
-            ;[x, y] = getXy(e)
+                ;[x, y] = getXy(e)
         }
 
         const handleDraw = (e) => {
+            if (!isDrawing) return
             e.preventDefault()
 
-            if (!isDrawing) return
             context.beginPath()
             context.moveTo(x, y)
-            ;[x, y] = getXy(e)
+                ;[x, y] = getXy(e)
             context.lineTo(x, y)
             context.stroke()
         }
+
         window.addEventListener('orientationchange', reset)
         context.canvas.addEventListener('mousedown', handleDrawInit)
+        context.canvas.addEventListener('mouseenter', handleInBounds)
         context.canvas.addEventListener('mousemove', handleDraw)
         context.canvas.addEventListener('mouseout', handleDrawEnd)
-        context.canvas.addEventListener('mouseenter', handleInBounds)
         context.canvas.addEventListener('mouseup', handleDrawEnd)
         context.canvas.addEventListener('touchend', handleDrawEnd)
         context.canvas.addEventListener('touchmove', handleDraw)
@@ -101,6 +104,7 @@ export const useSignature = ({
         return () => {
             window.removeEventListener('orientationchange', reset)
             context.canvas.removeEventListener('mousedown', handleDrawInit)
+            context.canvas.removeEventListener('mouseenter', handleInBounds)
             context.canvas.removeEventListener('mousemove', handleDraw)
             context.canvas.removeEventListener('mouseout', handleDrawEnd)
             context.canvas.removeEventListener('mouseup', handleDrawEnd)
@@ -112,6 +116,7 @@ export const useSignature = ({
 
     React.useEffect(() => {
         if (!context) return
+
         const originalImage = context.getImageData(0, 0, context.canvas.width, context.canvas.height)
         setCanvasHeight()
         initialiseCanvasStyles()
