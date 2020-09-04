@@ -13,6 +13,6 @@ git clone https://github.com/Alcumus/alcumus-signbot-plugin.git
 
 Add this to .env.development.local
 
-```json
+```javascript
 REACT_APP_DEFAULT_APPS=[...,"alcumus-signbot"]
 ```
